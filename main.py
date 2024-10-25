@@ -200,16 +200,24 @@ def valid_space(piece, grid):
     return True
 
 
-def draw_window(surface, grid):
+def draw_window(surface, grid, score=0):
     surface.fill((0, 0, 0))
     # Draw title
     font = pygame.font.SysFont('comicsans', 60)
     label = font.render('Tetris', True, (255, 255, 255))
     surface.blit(label, (SCREEN_WIDTH / 2 - label.get_width() / 2, 30))
-
+    
+    # Draw score
+    font = pygame.font.SysFont('comicsans', 30)
+    score_label = font.render(f'Score: {score}', True, (255, 255, 255))
+    surface.blit(score_label, (TOP_LEFT_X + GRID_WIDTH * BLOCK_SIZE + 20, TOP_LEFT_Y))
+    
     # Draw grid and border
     draw_grid(surface, grid)
-    pygame.draw.rect(surface, (255, 0, 0), (TOP_LEFT_X, TOP_LEFT_Y, GRID_WIDTH * BLOCK_SIZE, GRID_HEIGHT * BLOCK_SIZE), 5)
+    pygame.draw.rect(surface, (255, 0, 0),
+                     (TOP_LEFT_X, TOP_LEFT_Y, GRID_WIDTH * BLOCK_SIZE, GRID_HEIGHT * BLOCK_SIZE), 5)
+
+
 
 def draw_current_piece(surface, piece, grid):
     positions = convert_shape_format(piece)
@@ -220,6 +228,27 @@ def draw_current_piece(surface, piece, grid):
             pygame.draw.rect(surface, piece.color,
                              (TOP_LEFT_X + x * BLOCK_SIZE, TOP_LEFT_Y + y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE), 0)
             
+
+def clear_rows(grid, locked_positions):
+    increment = 0
+    for i in range(len(grid)-1, -1, -1):
+        row = grid[i]
+        if (0, 0, 0) not in row:
+            increment += 1
+            ind = i
+            for j in range(len(row)):
+                try:
+                    del locked_positions[(j, i)]
+                except:
+                    continue
+    if increment > 0:
+        for key in sorted(list(locked_positions), key=lambda x: x[1])[::-1]:
+            x, y = key
+            if y < ind:
+                newKey = (x, y + increment)
+                locked_positions[newKey] = locked_positions.pop(key)
+    return increment
+
 
 
 clock = pygame.time.Clock()
@@ -296,6 +325,7 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
+
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
                 current_piece.x -= 1
@@ -322,14 +352,18 @@ while running:
         next_piece = get_shape()
         change_piece = False
 
+        # Clear rows and update score
+        cleared_rows = clear_rows(grid, locked_positions)
+        if cleared_rows > 0:
+            score += cleared_rows * 100
+
     grid = create_grid(locked_positions)
-    draw_window(screen, grid)
+    draw_window(screen, grid, score)
     draw_current_piece(screen, current_piece, grid)
     pygame.display.update()
 
     if check_lost(locked_positions):
         running = False
 
-# Clean up
 pygame.quit()
 sys.exit()

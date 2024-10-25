@@ -16,6 +16,17 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        
+        # Handle key presses
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LEFT:
+                print("Left key pressed")
+            elif event.key == pygame.K_RIGHT:
+                print("Right key pressed")
+            elif event.key == pygame.K_DOWN:
+                print("Down key pressed")
+            elif event.key == pygame.K_UP:
+                print("Up key pressed")
     
     # Optional: Fill the screen with black
     screen.fill((0, 0, 0))

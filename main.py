@@ -153,12 +153,11 @@ TOP_LEFT_X = (SCREEN_WIDTH - GRID_WIDTH * BLOCK_SIZE) // 2
 TOP_LEFT_Y = SCREEN_HEIGHT - GRID_HEIGHT * BLOCK_SIZE - 20
 
 def create_grid(locked_positions={}):
-    grid = [[(0, 0, 0) for _ in range(GRID_WIDTH)] for _ in range(GRID_HEIGHT)]
-
-    for y in range(len(grid)):
-        for x in range(len(grid[y])):
-            if (x, y) in locked_positions:
-                grid[y][x] = locked_positions[(x, y)]
+    grid = [[(0, 0, 0) for _ in range(10)] for _ in range(24)]  # Increase height from 20 to 24
+    for pos in locked_positions:
+        x, y = pos
+        if y >= 0:
+            grid[y][x] = locked_positions[pos]
     return grid
 
 
@@ -310,9 +309,15 @@ if change_piece:
 pygame.init()
 
 # Main loop
+score_timing = 0
 running = True
 while running:
     fall_time += clock.get_rawtime()
+    score_timing += 1
+    if score_timing == 50:
+        score += 1
+        score_timing = 0
+
     clock.tick()
 
     # Fall logic
@@ -344,6 +349,12 @@ while running:
                 current_piece.rotation += 1
                 if not valid_space(current_piece, grid):
                     current_piece.rotation -= 1
+            elif event.key == pygame.K_SPACE:
+                # Snap-place the piece
+                while valid_space(current_piece, grid):
+                    current_piece.y += 1
+                current_piece.y -= 1
+                change_piece = True
 
     if change_piece:
         for pos in convert_shape_format(current_piece):
@@ -353,7 +364,6 @@ while running:
         current_piece = next_piece
         next_piece = get_shape()
         change_piece = False
-
 
     grid = create_grid(locked_positions)
     cleared_rows = clear_rows(grid, locked_positions)

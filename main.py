@@ -243,6 +243,35 @@ locked_positions = {}  # (x, y):(255,0,0)
 change_piece = False
 grid = create_grid(locked_positions)
 
+def get_shape():
+    return Piece(5, 0, random.choice(SHAPES))
+
+# Initialize game variables
+locked_positions = {}
+grid = create_grid(locked_positions)
+current_piece = get_shape()
+next_piece = get_shape()
+clock = pygame.time.Clock()
+fall_time = 0
+fall_speed = 0.5
+change_piece = False
+running = True
+
+def check_lost(positions):
+    for pos in positions:
+        x, y = pos
+        if y < 1:
+            return True
+    return False
+
+if change_piece:
+    for pos in convert_shape_format(current_piece):
+        p = (pos[0], pos[1])
+        locked_positions[p] = current_piece.color
+    current_piece = next_piece
+    next_piece = get_shape()
+    change_piece = False
+
 
 # Initialize Pygame
 pygame.init()
@@ -252,6 +281,17 @@ pygame.init()
 # Main loop
 running = True
 while running:
+    fall_time += clock.get_rawtime()
+    clock.tick()
+
+    # Fall logic
+    if fall_time / 1000 >= fall_speed:
+        fall_time = 0
+        current_piece.y += 1
+        if not valid_space(current_piece, grid) and current_piece.y > 0:
+            current_piece.y -= 1
+            change_piece = True
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -274,12 +314,21 @@ while running:
                 if not valid_space(current_piece, grid):
                     current_piece.rotation -= 1
 
-    
-    # Optional: Fill the screen with black
-    # screen.fill((0, 0, 0))
+    if change_piece:
+        for pos in convert_shape_format(current_piece):
+            p = (pos[0], pos[1])
+            locked_positions[p] = current_piece.color
+        current_piece = next_piece
+        next_piece = get_shape()
+        change_piece = False
 
-    # Update the display
-    pygame.display.flip()
+    grid = create_grid(locked_positions)
+    draw_window(screen, grid)
+    draw_current_piece(screen, current_piece, grid)
+    pygame.display.update()
+
+    if check_lost(locked_positions):
+        running = False
 
 # Clean up
 pygame.quit()

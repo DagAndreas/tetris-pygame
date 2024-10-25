@@ -1,3 +1,7 @@
+# to run:
+# pip install pygame
+# python main.py
+
 import pygame
 import sys
 
@@ -134,10 +138,10 @@ class Piece(object):
         self.rotation = 0  # Current rotation index
 
 # Set up the display
-SCREEN_WIDTH = 400
-SCREEN_HEIGHT = 600
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 800
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Tetris")
+# pygame.display.setCaption("Tetris")
 
 # Grid dimensions and block size
 GRID_WIDTH = 10
@@ -305,8 +309,6 @@ if change_piece:
 # Initialize Pygame
 pygame.init()
 
-
-
 # Main loop
 running = True
 while running:
@@ -324,7 +326,6 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-
 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
@@ -348,16 +349,16 @@ while running:
         for pos in convert_shape_format(current_piece):
             p = (pos[0], pos[1])
             locked_positions[p] = current_piece.color
+
         current_piece = next_piece
         next_piece = get_shape()
         change_piece = False
 
-        # Clear rows and update score
-        cleared_rows = clear_rows(grid, locked_positions)
-        if cleared_rows > 0:
-            score += cleared_rows * 100
 
     grid = create_grid(locked_positions)
+    cleared_rows = clear_rows(grid, locked_positions)
+    if cleared_rows > 0:
+        score += cleared_rows * 100
     draw_window(screen, grid, score)
     draw_current_piece(screen, current_piece, grid)
     pygame.display.update()

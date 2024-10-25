@@ -125,16 +125,32 @@ SHAPE_COLORS = [
     (128, 0, 128)   # T - Purple
 ]
 
-
-
-# Initialize Pygame
-pygame.init()
+class Piece(object):
+    def __init__(self, x, y, shape):
+        self.x = x  # X position on the grid
+        self.y = y  # Y position on the grid
+        self.shape = shape
+        self.color = SHAPE_COLORS[SHAPES.index(shape)]
+        self.rotation = 0  # Current rotation index
 
 # Set up the display
 SCREEN_WIDTH = 400
 SCREEN_HEIGHT = 600
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Tetris")
+
+# Grid dimensions and block size
+GRID_WIDTH = 10
+GRID_HEIGHT = 20
+BLOCK_SIZE = 30
+
+# Top-left position of the play area
+TOP_LEFT_X = (SCREEN_WIDTH - GRID_WIDTH * BLOCK_SIZE) // 2
+TOP_LEFT_Y = SCREEN_HEIGHT - GRID_HEIGHT * BLOCK_SIZE - 20
+
+# Initialize Pygame
+pygame.init()
+
 
 
 # Main loop

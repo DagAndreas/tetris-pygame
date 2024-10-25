@@ -176,6 +176,74 @@ def draw_grid(surface, grid):
 
 
 
+def convert_shape_format(piece):
+    positions = []
+    format = piece.shape[piece.rotation % len(piece.shape)]
+
+    for i, line in enumerate(format):
+        row = list(line)
+        for j, char in enumerate(row):
+            if char == '0':
+                positions.append((piece.x + j - 2, piece.y + i - 4))
+
+    return positions
+
+def valid_space(piece, grid):
+    accepted_positions = [[(x, y) for x in range(GRID_WIDTH) if grid[y][x] == (0, 0, 0)] for y in range(GRID_HEIGHT)]
+    accepted_positions = [pos for sublist in accepted_positions for pos in sublist]
+
+    formatted = convert_shape_format(piece)
+
+    for pos in formatted:
+        if pos not in accepted_positions and pos[1] > -1:
+            return False
+    return True
+
+
+def draw_window(surface, grid):
+    surface.fill((0, 0, 0))
+    # Draw title
+    font = pygame.font.SysFont('comicsans', 60)
+    label = font.render('Tetris', True, (255, 255, 255))
+    surface.blit(label, (SCREEN_WIDTH / 2 - label.get_width() / 2, 30))
+
+    # Draw grid and border
+    draw_grid(surface, grid)
+    pygame.draw.rect(surface, (255, 0, 0), (TOP_LEFT_X, TOP_LEFT_Y, GRID_WIDTH * BLOCK_SIZE, GRID_HEIGHT * BLOCK_SIZE), 5)
+
+def draw_current_piece(surface, piece, grid):
+    positions = convert_shape_format(piece)
+
+    for pos in positions:
+        x, y = pos
+        if y > -1:
+            pygame.draw.rect(surface, piece.color,
+                             (TOP_LEFT_X + x * BLOCK_SIZE, TOP_LEFT_Y + y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE), 0)
+            
+
+
+clock = pygame.time.Clock()
+fall_time = 0
+fall_speed = 0.5  # Adjust to change speed
+
+
+fall_time += clock.get_rawtime()
+clock.tick()
+
+# Piece falls every `fall_speed` seconds
+if fall_time / 1000 >= fall_speed:
+    fall_time = 0
+    current_piece.y += 1
+    if not valid_space(current_piece, grid) and current_piece.y > 0:
+        current_piece.y -= 1
+        change_piece = True
+
+
+locked_positions = {}  # (x, y):(255,0,0)
+change_piece = False
+grid = create_grid(locked_positions)
+
+
 # Initialize Pygame
 pygame.init()
 
@@ -187,17 +255,25 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        
-        # Handle key presses
-        elif event.type == pygame.KEYDOWN:
+
+        if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
-                print("Left key pressed")
+                current_piece.x -= 1
+                if not valid_space(current_piece, grid):
+                    current_piece.x += 1
             elif event.key == pygame.K_RIGHT:
-                print("Right key pressed")
+                current_piece.x += 1
+                if not valid_space(current_piece, grid):
+                    current_piece.x -= 1
             elif event.key == pygame.K_DOWN:
-                print("Down key pressed")
+                current_piece.y += 1
+                if not valid_space(current_piece, grid):
+                    current_piece.y -= 1
             elif event.key == pygame.K_UP:
-                print("Up key pressed")
+                current_piece.rotation += 1
+                if not valid_space(current_piece, grid):
+                    current_piece.rotation -= 1
+
     
     # Optional: Fill the screen with black
     # screen.fill((0, 0, 0))

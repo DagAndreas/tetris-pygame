@@ -1,6 +1,15 @@
 import pygame
 import sys
 
+# Game state variables
+score = 0
+level = 1
+grid = [[0 for _ in range(10)] for _ in range(20)]  # 10 columns x 20 rows grid
+current_piece = None
+next_piece = None
+
+
+
 # Initialize Pygame
 pygame.init()
 
@@ -9,6 +18,7 @@ SCREEN_WIDTH = 400
 SCREEN_HEIGHT = 600
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Tetris")
+
 
 # Main loop
 running = True

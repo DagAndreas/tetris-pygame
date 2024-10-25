@@ -148,6 +148,34 @@ BLOCK_SIZE = 30
 TOP_LEFT_X = (SCREEN_WIDTH - GRID_WIDTH * BLOCK_SIZE) // 2
 TOP_LEFT_Y = SCREEN_HEIGHT - GRID_HEIGHT * BLOCK_SIZE - 20
 
+def create_grid(locked_positions={}):
+    grid = [[(0, 0, 0) for _ in range(GRID_WIDTH)] for _ in range(GRID_HEIGHT)]
+
+    for y in range(len(grid)):
+        for x in range(len(grid[y])):
+            if (x, y) in locked_positions:
+                grid[y][x] = locked_positions[(x, y)]
+    return grid
+
+
+def draw_grid(surface, grid):
+    for y in range(len(grid)):
+        for x in range(len(grid[y])):
+            pygame.draw.rect(surface, grid[y][x],
+                             (TOP_LEFT_X + x * BLOCK_SIZE, TOP_LEFT_Y + y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE), 0)
+
+    # Draw grid lines
+    for i in range(len(grid)):
+        pygame.draw.line(surface, (128, 128, 128),
+                         (TOP_LEFT_X, TOP_LEFT_Y + i * BLOCK_SIZE),
+                         (TOP_LEFT_X + GRID_WIDTH * BLOCK_SIZE, TOP_LEFT_Y + i * BLOCK_SIZE))
+    for j in range(GRID_WIDTH + 1):
+        pygame.draw.line(surface, (128, 128, 128),
+                         (TOP_LEFT_X + j * BLOCK_SIZE, TOP_LEFT_Y),
+                         (TOP_LEFT_X + j * BLOCK_SIZE, TOP_LEFT_Y + GRID_HEIGHT * BLOCK_SIZE))
+
+
+
 # Initialize Pygame
 pygame.init()
 
